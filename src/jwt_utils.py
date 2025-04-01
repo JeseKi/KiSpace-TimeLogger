@@ -1,7 +1,7 @@
 import asyncio
 import secrets
 import time
-import requests
+import httpx
 
 from fastapi import Depends, HTTPException, status, APIRouter
 from fastapi.responses import JSONResponse
@@ -19,20 +19,20 @@ session_states = {}
 
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserInfo:
     try:
-        response = await asyncio.to_thread(requests.get, f"{CASDOOR_ENDPOINT}/api/user", 
-                                             headers={"Authorization": f"Bearer {token}"})
-        
-        response.raise_for_status()
-        user_data = response.json()
-        return UserInfo(
-            id=user_data["id"],
-            name=user_data["name"],
-            email=user_data["email"],
-            email_verified_at=user_data["email_verified_at"],
-            created_at=user_data["created_at"],
-            updated_at=user_data["updated_at"]
-        )
-    except requests.exceptions.HTTPError as e:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(f"{CASDOOR_ENDPOINT}/api/user", 
+                                       headers={"Authorization": f"Bearer {token}"})
+            response.raise_for_status()
+            user_data = response.json()
+            return UserInfo(
+                id=user_data["id"],
+                name=user_data["name"],
+                email=user_data["email"],
+                email_verified_at=user_data["email_verified_at"],
+                created_at=user_data["created_at"],
+                updated_at=user_data["updated_at"]
+            )
+    except httpx.HTTPStatusError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
@@ -44,13 +44,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserInfo:
             detail=f"Internal Server Error: {str(e)}",
         )
 
-def requests_get_token(token_endpoint, token_params, headers):
+async def httpx_get_token(token_endpoint, token_params, headers):
     try:
-        response = requests.post(token_endpoint, data=token_params, headers=headers)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.HTTPError as e:
-        raise e
+        async with httpx.AsyncClient() as client:
+            response = await client.post(token_endpoint, data=token_params, headers=headers, timeout=10)
+            response.raise_for_status()
+            return response.json()
     except Exception as e:
         raise e
     
@@ -109,10 +108,10 @@ async def casdoor_callback(callback: CallbackRequest) -> TokenResponse:
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
     try:
-        token_data = await asyncio.to_thread(requests_get_token, token_endpoint, token_params, headers)
+        token_data = await httpx_get_token(token_endpoint, token_params, headers)
         return token_data
 
-    except requests.exceptions.HTTPError as e:
+    except httpx.HTTPStatusError as e:
         return JSONResponse(content={"error": f"Failed to get token from Casdoor: {e}"}, status_code=400)
     except Exception as e:
         return JSONResponse(content={"error": f"Internal server error during token exchange: {e}"}, status_code=500)

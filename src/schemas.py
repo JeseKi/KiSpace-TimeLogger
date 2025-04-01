@@ -20,7 +20,7 @@ class UserInfo(BaseModel):
     created_at: str
     updated_at: str
 
-class Timelog(BaseModel):
+class TimelogRequest(BaseModel):
     timestamp: str
     activity: str
     tag: str
