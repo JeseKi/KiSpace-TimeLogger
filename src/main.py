@@ -1,11 +1,12 @@
 import asyncio
 from fastapi import FastAPI, Depends, HTTPException, APIRouter
 from fastapi.concurrency import asynccontextmanager
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from duckdb import DuckDBPyConnection
 from loguru import logger
-from starlette.responses import FileResponse
 
 from jwt_utils import cleanup_expired_states, jwt_router, get_current_user, UserInfo
 from config import SECRET_KEY
@@ -150,3 +151,10 @@ async def timelog_export(user: UserInfo = Depends(get_current_user), db: DuckDBP
 
 app.include_router(jwt_router, prefix="/api/auth", tags=["auth"])
 app.include_router(timelog_router, prefix="/api/timelogs", tags=["timelogs"])
+
+@app.get("/{path}")
+async def catch_all(path: str):
+    logger.info(f"Requested path: {path}")
+    return FileResponse("dist/index.html")
+
+app.mount("/", StaticFiles(directory="dist", html=True), name="frontend")
