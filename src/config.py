@@ -1,13 +1,18 @@
-import json
+import os
 
-config = json.load(open("config.json"))
+from loguru import logger
 
-SECRET_KEY: str = config["secret_key"]
-CASDOOR_ENDPOINT: str = config["casdoor_endpoint"]
-CASDOOR_CLIENT_ID: str = config["casdoor_client_id"]
-CASDOOR_CLIENT_SECRET: str = config["casdoor_client_secret"]
-CASDOOR_REDIRECT_URI: str = config["casdoor_redirect_uri"]
-CASDOOR_TOKEN_ENDPOINT: str = config["casdoor_token_endpoint"]
-CASDOOR_APP_NAME: str = config["casdoor_app_name"]
-CASDOOR_ORGANIZATION_NAME: str = config["casdoor_organization_name"]
-ALLOW_ORIGINS: list[str] = config["allow_origins"]
+from dotenv import load_dotenv
+load_dotenv("../.env")  # 显式加载 .env 文件
+
+SECRET_KEY: str = os.environ.get("SECRET_KEY")
+CASDOOR_ENDPOINT: str = os.environ.get("CASDOOR_ENDPOINT")
+CASDOOR_CLIENT_ID: str = os.environ.get("CASDOOR_CLIENT_ID")
+CASDOOR_CLIENT_SECRET: str = os.environ.get("CASDOOR_CLIENT_SECRET")
+CASDOOR_REDIRECT_URI: str = os.environ.get("CASDOOR_REDIRECT_URI")
+CASDOOR_TOKEN_ENDPOINT: str = os.environ.get("CASDOOR_TOKEN_ENDPOINT")
+CASDOOR_APP_NAME: str = os.environ.get("CASDOOR_APP_NAME")
+CASDOOR_ORGANIZATION_NAME: str = os.environ.get("CASDOOR_ORGANIZATION_NAME")
+ALLOW_ORIGINS: list[str] = os.environ.get("ALLOW_ORIGINS", "*").split(",")
+
+logger.debug(f"ALLOW_ORIGINS: {ALLOW_ORIGINS}")
