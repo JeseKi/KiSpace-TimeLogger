@@ -7,3 +7,4 @@ services:
       - ENVIRONMENT=production
     volumes:
       - .:/app
+      - ./data:/app/src 
