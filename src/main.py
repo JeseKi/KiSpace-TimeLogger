@@ -9,14 +9,10 @@ from duckdb import DuckDBPyConnection
 from loguru import logger
 
 from jwt_utils import cleanup_expired_states, jwt_router, get_current_user, UserInfo
-from config import SECRET_KEY
+from config import SECRET_KEY, ALLOW_ORIGINS
 from schemas import TimelogRequest
 from database.base import init_db, get_db
 from database.crud import get_timelogs_by_date_range, create_timelog, delete_timelog, update_timelog, export_to_csv
-
-origins = [
-    "*"
-]
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -30,7 +26,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=ALLOW_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],  
