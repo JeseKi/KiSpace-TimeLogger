@@ -10,11 +10,13 @@ interface PieChartData {
 interface TagPieChartProps {
     data: PieChartData[];
     innerRadiusRatio?: number;
+    tagColors?: Record<string, string>; 
 }
 
 const TagPieChart: React.FC<TagPieChartProps> = ({
     data,
     innerRadiusRatio = 0.6,
+    tagColors = {}, 
 }) => {
     const svgRef = useRef<SVGSVGElement | null>(null);
     const tooltipRef = useRef<HTMLDivElement | null>(null);
@@ -36,7 +38,10 @@ const TagPieChart: React.FC<TagPieChartProps> = ({
 
         const g = svg.append('g')
             .attr('transform', `translate(${svgWidth / 2 + padding}, ${svgHeight / 2 + padding})`);
-        const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+        
+        const getColor = (label: string) => {
+            return tagColors[label] || d3.schemeCategory10[data.findIndex(d => d.label === label) % 10];
+        };
 
         const pie = d3.pie()
             .value((d: PieChartData) => d.value)
@@ -56,7 +61,7 @@ const TagPieChart: React.FC<TagPieChartProps> = ({
 
         arcs.append('path')
             .attr('d', arc)
-            .attr('fill', (d: any) => colorScale(d.data.label))
+            .attr('fill', (d: any) => getColor(d.data.label))
             .attr('stroke', '#ffffff')
             .style('stroke-width', '2px')
             .on('mouseover', (event: MouseEvent, d: any) => {
@@ -90,7 +95,19 @@ const TagPieChart: React.FC<TagPieChartProps> = ({
                     .attr('opacity', 1);
             });
 
-    }, [data, innerRadiusRatio]);
+        const legend = svg.append('g')
+            .attr('transform', `translate(${svgWidth / 2 + padding}, ${svgHeight + padding - 10})`)
+            .attr('text-anchor', 'middle');
+
+        const totalValue = d3.sum(data, (d: PieChartData) => d.value);
+        legend.append('text')
+            .attr('class', 'total-value')
+            .attr('dy', '-10em')
+            .style('font-size', '16px')
+            .style('font-weight', 'bold')
+            .text(`总计: ${formatDuration(totalValue)}`);
+
+    }, [data, innerRadiusRatio, tagColors]);
 
     return (
         <div className="relative w-full h-full flex justify-center items-center">
@@ -99,9 +116,8 @@ const TagPieChart: React.FC<TagPieChartProps> = ({
                 <div
                     ref={tooltipRef}
                     className="fixed bg-gray-800 text-white text-xs rounded py-1 px-2 pointer-events-none shadow-lg"
-                    style={{ opacity: 0, transition: 'opacity 0.2s' }}
-                >
-                </div>
+                    style={{ opacity: 0 }}
+                ></div>
             </div>
         </div>
     );

@@ -21,6 +21,7 @@ export interface UserInfoResponse {
 export interface Timelog {
     uuid?: string;
     timestamp: string;
+    duration?: number;
     activity: string;
     tag: string;
 }
