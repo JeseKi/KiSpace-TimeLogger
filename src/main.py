@@ -1,4 +1,5 @@
 import asyncio
+import os
 from fastapi import FastAPI, Depends, HTTPException, APIRouter
 from fastapi.concurrency import asynccontextmanager
 from fastapi.staticfiles import StaticFiles
@@ -23,7 +24,15 @@ async def lifespan(app: FastAPI):
     yield
     logger.info("TimeLogger关闭中...")
     
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    title="TimeLogger",
+    description="TimeLogger是一款时间监控应用，我自己的习惯是以时间戳+描述+标签的方式来记录自己的时间。因此这款应用的重点就在于对时间的记录和监控。",
+    version="1.0.0",
+    lifespan=lifespan,
+    docs_url="/docs" if os.environ.get("ENVIRONMENT") != "production" else None,
+    redoc_url="/redoc" if os.environ.get("ENVIRONMENT") != "production" else None,
+    openapi_url="/openapi.json" if os.environ.get("ENVIRONMENT") != "production" else None,
+)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOW_ORIGINS,
