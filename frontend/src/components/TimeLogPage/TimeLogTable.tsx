@@ -206,7 +206,7 @@ const TimeLogTable: React.FC<TimeLogTableProps> = ({
             showSizeChanger: true,
             pageSizeOptions: ['10', '20', '50', '100'],
         }}
-        className="shadow-md rounded-lg overflow-hidden"
+        className="shadow-md rounded-lg overflow-x-auto overflow-y-hidden"
       />
       
       {!loading && !error && timelogs.length === 0 && (

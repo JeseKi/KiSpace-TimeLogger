@@ -96,13 +96,12 @@ const TagPieChart: React.FC<TagPieChartProps> = ({
             });
 
         const legend = svg.append('g')
-            .attr('transform', `translate(${svgWidth / 2 + padding}, ${svgHeight + padding - 10})`)
+            .attr('transform', `translate(${svgWidth / 2 + padding}, ${svgHeight / 2 + padding})`)
             .attr('text-anchor', 'middle');
 
         const totalValue = d3.sum(data, (d: PieChartData) => d.value);
         legend.append('text')
             .attr('class', 'total-value')
-            .attr('dy', '-10em')
             .style('font-size', '16px')
             .style('font-weight', 'bold')
             .text(`总计: ${formatDuration(totalValue)}`);

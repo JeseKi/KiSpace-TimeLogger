@@ -25,7 +25,7 @@ const TimeLogPage: React.FC = () => {
   // 日期范围
   const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null]>([
     dayjs().subtract(7, 'day'),
-    dayjs(),
+    dayjs().add(1, 'day'),
   ]);
   
   // 模态框状态管理
