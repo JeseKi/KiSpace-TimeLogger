@@ -5,12 +5,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from duckdb import DuckDBPyConnection
 from loguru import logger
+from starlette.responses import FileResponse
 
 from jwt_utils import cleanup_expired_states, jwt_router, get_current_user, UserInfo
 from config import SECRET_KEY
 from schemas import TimelogRequest
 from database.base import init_db, get_db
-from database.crud import get_timelogs_by_date_range, create_timelog, delete_timelog, update_timelog
+from database.crud import get_timelogs_by_date_range, create_timelog, delete_timelog, update_timelog, export_to_csv
 
 origins = [
     "*"
@@ -135,6 +136,17 @@ async def timelog_update(uuid: str, timelog: TimelogRequest, user: UserInfo = De
     except Exception as e:
         logger.error(f"更新时间记录失败: {str(e)}")
         raise HTTPException(status_code=500, detail=f"更新时间记录失败: {str(e)}")
+    
+@timelog_router.get("/export")
+async def timelog_export(user: UserInfo = Depends(get_current_user), db: DuckDBPyConnection = Depends(get_db)):
+    try:
+        file_path = "/tmp/timelogs.csv"
+        await export_to_csv(user.id, file_path, db)
+        return FileResponse(file_path, filename="timelogs.csv")
+    except Exception as e:
+        logger.error(f"导出时间记录失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"导出时间记录失败: {str(e)}")
+
 
 app.include_router(jwt_router, prefix="/api/auth", tags=["auth"])
 app.include_router(timelog_router, prefix="/api/timelogs", tags=["timelogs"])

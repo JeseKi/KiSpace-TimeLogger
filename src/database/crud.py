@@ -116,3 +116,16 @@ async def update_timelog(uuid: str, user_id: str, timestamp: str, activity: str,
         except Exception as e:
             logger.error(f"更新时间记录失败: {str(e)}")
             raise HTTPException(status_code=500, detail=f"更新时间记录失败: {str(e)}")
+        
+async def export_to_csv(user_id: str, file_path: str, db):
+    try:
+        async with db as conn:
+            query = f"""
+                COPY (SELECT * FROM time_logs WHERE user_id = '{user_id}') 
+                TO '{file_path}' (FORMAT CSV, HEADER);
+            """
+            conn.execute(query)
+    except Exception as e:
+        logger.error(f"导出时间记录失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"导出时间记录失败: {str(e)}")
+    
