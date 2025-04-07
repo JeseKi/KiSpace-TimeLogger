@@ -1,7 +1,8 @@
 import asyncio
 from functools import wraps
-from fastapi import HTTPException
 from typing import Callable, Type, Tuple, Optional
+
+from fastapi import HTTPException
 
 def timeout(seconds: float = 10):
     def decorator(func):

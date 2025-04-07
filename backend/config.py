@@ -1,9 +1,7 @@
 import os
 
-from loguru import logger
-
 from dotenv import load_dotenv
-load_dotenv("../.env")  # 显式加载 .env 文件
+load_dotenv("../.env")
 
 SECRET_KEY: str = os.environ.get("SECRET_KEY")
 CASDOOR_ENDPOINT: str = os.environ.get("CASDOOR_ENDPOINT")
@@ -14,5 +12,3 @@ CASDOOR_TOKEN_ENDPOINT: str = os.environ.get("CASDOOR_TOKEN_ENDPOINT")
 CASDOOR_APP_NAME: str = os.environ.get("CASDOOR_APP_NAME")
 CASDOOR_ORGANIZATION_NAME: str = os.environ.get("CASDOOR_ORGANIZATION_NAME")
 ALLOW_ORIGINS: list[str] = os.environ.get("ALLOW_ORIGINS", "*").split(",")
-
-logger.debug(f"ALLOW_ORIGINS: {ALLOW_ORIGINS}")

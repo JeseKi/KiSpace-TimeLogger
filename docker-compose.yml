@@ -7,4 +7,4 @@ services:
       - ENVIRONMENT=production
     volumes:
       - .:/app
-      - ./data:/app/src 
+      - ./data:/app/backend/data 
